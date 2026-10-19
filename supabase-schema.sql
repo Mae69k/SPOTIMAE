@@ -37,6 +37,36 @@ create policy "Users can update their own tracks" on public.tracks for update to
 drop policy if exists "Users can delete their own tracks" on public.tracks;
 create policy "Users can delete their own tracks" on public.tracks for delete to authenticated using ((select auth.uid()) = user_id);
 
+-- Profil utilisateur : nom, prénom et chemin de la photo dans Storage.
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  first_name text not null default '',
+  last_name text not null default '',
+  avatar_path text,
+  updated_at timestamptz not null default now()
+);
+alter table public.profiles enable row level security;
+revoke all on public.profiles from anon;
+grant select, insert, update on public.profiles to authenticated;
+drop policy if exists "Users can read their own profile" on public.profiles;
+create policy "Users can read their own profile" on public.profiles for select to authenticated using ((select auth.uid()) = id);
+drop policy if exists "Users can insert their own profile" on public.profiles;
+create policy "Users can insert their own profile" on public.profiles for insert to authenticated with check ((select auth.uid()) = id);
+drop policy if exists "Users can update their own profile" on public.profiles;
+create policy "Users can update their own profile" on public.profiles for update to authenticated using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
+
+-- Activer les changements en direct pour les bibliothèques ouvertes sur d'autres appareils.
+do $$ begin
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='tracks') then
+    alter publication supabase_realtime add table public.tracks;
+  end if;
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='profiles') then
+    alter publication supabase_realtime add table public.profiles;
+  end if;
+end $$;
+alter table public.tracks replica identity full;
+alter table public.profiles replica identity full;
+
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('spotimae-media', 'spotimae-media', false, 52428800,
   array['audio/mpeg','audio/wav','audio/x-wav','image/jpeg','image/png','image/webp','image/gif'])
