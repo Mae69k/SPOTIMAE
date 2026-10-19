@@ -1,0 +1,26 @@
+{
+  "name": "SPOTIMAE — Ta musique, en privé",
+  "short_name": "SPOTIMAE",
+  "description": "Ta bibliothèque musicale personnelle, stockée sur ton appareil.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101210",
+  "theme_color": "#101210",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

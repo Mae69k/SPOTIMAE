@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101210"><meta name="description" content="Ta musique, en privé. Bibliothèque musicale personnelle.">
+  <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192"><link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="SPOTIMAE">
+  <title>SPOTIMAE — Ta musique, en privé</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar"><a class="brand" href="#home" aria-label="SPOTIMAE accueil"><img class="brand-mark-img" src="assets/icon-192.png" alt=""><span>SPOTIMAE</span></a><div class="header-actions"><button id="accountButton" class="account-button">Mon compte</button><button id="installBtn" class="icon-button install-button" hidden aria-label="Installer SPOTIMAE">＋<span>Installer</span></button></div></header>
+  <main>
+    <section class="welcome" id="home"><div><p class="eyebrow">TA BIBLIOTHÈQUE PERSONNELLE</p><h1>La musique,<br><em>à ta façon.</em></h1><p class="intro">Tous tes morceaux au même endroit. Privés, disponibles sur ton appareil.</p><button id="importHero" class="primary-button"><span>＋</span> Importer ma musique</button></div><div class="hero-disc" aria-hidden="true"><div class="disc-lines"></div><div class="disc-center">S</div></div></section>
+    <section class="library-section" id="library"><div class="section-heading"><div><p class="eyebrow">COLLECTION</p><h2>Ta bibliothèque</h2></div><button id="importButton" class="round-add" title="Importer des fichiers">＋</button><input id="fileInput" type="file" accept="audio/mpeg,audio/wav,.mp3,.wav" multiple hidden></div>
+      <div class="toolbar"><label class="search"><span>⌕</span><input id="searchInput" placeholder="Titres, artistes…" autocomplete="off"></label><button id="filterButton" class="filter-button" aria-pressed="false">♥ <span>Favoris</span></button></div>
+      <div class="collection-meta"><span id="trackCount">0 morceau</span><span id="storageStatus">STOCKÉ SUR CET APPAREIL</span></div>
+      <div id="trackList" class="track-list"></div>
+      <div id="emptyState" class="empty-state"><div class="empty-icon">♫</div><h3>Ta collection commence ici</h3><p>Ajoute tes MP3 et WAV. Ils resteront enregistrés sur cet appareil.</p><button id="emptyImport" class="text-button">Choisir des morceaux <span>→</span></button></div>
+    </section>
+  </main>
+  <footer><span class="footer-mark">●</span> SPOTIMAE <span>·</span> Ta musique, en privé.</footer>
+</div>
+<div id="player" class="player" hidden><div class="player-main"><div class="cover-art" id="playerCover">♫</div><div class="now-playing"><strong id="nowTitle">—</strong><span id="nowArtist">—</span></div><button id="prevBtn" class="player-control" aria-label="Précédent">|◀</button><button id="playBtn" class="play-control" aria-label="Lecture ou pause">▶</button><button id="nextBtn" class="player-control" aria-label="Suivant">▶|</button><button id="lyricsOpenButton" class="player-control lyrics-open">Paroles</button><button id="playerFav" class="player-control heart" aria-label="Ajouter aux favoris">♡</button><button id="closePlayer" class="player-control close-control" aria-label="Fermer le lecteur">×</button></div><div class="seek-row"><span id="elapsed">0:00</span><input id="seek" type="range" min="0" max="1000" value="0"><span id="duration">0:00</span></div><audio id="audio" preload="metadata"></audio></div>
+<dialog id="trackDialog" class="track-dialog">
+  <form id="trackForm" class="track-form">
+    <div class="dialog-heading"><div><p class="eyebrow">NOUVEAU MORCEAU</p><h2>Ajouter à SPOTIMAE</h2></div><button type="button" id="cancelTrack" class="dialog-close" aria-label="Fermer">×</button></div>
+    <div class="selected-file"><span class="file-symbol">♫</span><div><strong id="selectedFileName">Aucun fichier choisi</strong><small>Fichier audio MP3 ou WAV</small></div><button type="button" id="chooseAudio" class="choose-file">Choisir</button><input id="audioInput" type="file" accept="audio/mpeg,audio/wav,.mp3,.wav" hidden></div>
+    <div class="form-grid"><label>Titre <b>*</b><input id="metaTitle" required maxlength="120" placeholder="Titre du morceau"></label><label>Artiste <b>*</b><input id="metaArtist" required maxlength="120" placeholder="Nom de l’artiste"></label><label>Album <span>facultatif</span><input id="metaAlbum" maxlength="120" placeholder="Nom de l’album"></label><div class="form-two"><label>Année <span>facultatif</span><input id="metaYear" type="number" min="1900" max="2100" placeholder="2025"></label><label>Genre <span>facultatif</span><input id="metaGenre" maxlength="60" placeholder="Pop, jazz…"></label></div>
+    <label class="cover-label">Pochette <span>facultatif · image enregistrée avec le morceau</span><div class="cover-picker"><div id="coverPreview" class="cover-preview">♫</div><button type="button" id="chooseCover" class="choose-file">Choisir une image</button><input id="coverInput" type="file" accept="image/*" hidden></div></label>
+    <label>Paroles <span>facultatif</span><textarea id="metaLyrics" rows="3" maxlength="15000" placeholder="Tu peux ajouter les paroles ici…"></textarea></label></div>
+    <div class="dialog-actions"><button type="button" id="cancelTrack2" class="secondary-button">Annuler</button><button type="submit" id="saveTrackButton" class="primary-button" disabled>Enregistrer le morceau</button></div>
+  </form>
+</dialog>
+<dialog id="lyricsDialog" class="track-dialog lyrics-dialog">
+  <section id="lyricsReader" class="lyrics-reader">
+    <header class="lyrics-reader-header"><button type="button" id="closeLyrics" class="reader-icon" aria-label="Fermer les paroles">×</button><div class="reader-track"><strong id="lyricsTitle">Paroles</strong><span id="lyricsArtist"></span></div><div class="lyrics-menu-wrap"><button type="button" id="lyricsMenuButton" class="reader-icon" aria-label="Options des paroles">⋯</button><div id="lyricsMenu" class="lyrics-menu" hidden><button type="button" id="editLyricsButton">Modifier</button><button type="button" id="menuImportLrcButton">Importer un fichier LRC</button></div></div></header>
+    <div class="lyrics-reading-area"><div id="lyricsIntroIndicator" class="lyrics-intro-indicator" hidden><svg id="lyricsIntroRing" class="lyrics-intro-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="lyrics-intro-track" cx="60" cy="60" r="52"></circle><circle id="lyricsIntroArc" class="lyrics-intro-arc" cx="60" cy="60" r="52" transform="rotate(-90 60 60)"></circle></svg><span id="lyricsIntroRemaining" class="lyrics-intro-remaining" aria-live="off"></span></div><div id="lyricsDisplay" class="lyrics-display" aria-live="polite"></div></div>
+    <footer class="lyrics-reader-controls"><div class="reader-seek"><span id="lyricsElapsed">0:00</span><input id="lyricsSeek" type="range" min="0" max="1000" value="0"><span id="lyricsDuration">0:00</span></div><div class="reader-play-row"><span id="readerTrackLabel"></span><button type="button" id="lyricsPlayButton" class="reader-play">▶</button><button type="button" id="readerNextButton" class="reader-icon" aria-label="Morceau suivant">▶|</button></div></footer>
+  </section>
+  <section id="lyricsEditPanel" class="lyrics-editor-panel" hidden>
+    <div class="track-form">
+      <div class="dialog-heading"><div><p class="eyebrow">PAROLES SYNCHRONISÉES</p><h2>Modifier les paroles</h2></div><button type="button" id="backToLyrics" class="dialog-close" aria-label="Retour aux paroles">×</button></div>
+      <p class="lyrics-edit-track"><strong id="editLyricsTitle"></strong><span id="editLyricsArtist"></span></p>
+      <label class="lyrics-label">Paroles <span>une phrase par ligne</span><textarea id="lyricsEditor" rows="7" maxlength="15000" placeholder="Colle les paroles ici, avec une phrase par ligne…"></textarea></label>
+      <div class="lyrics-import"><button type="button" id="importLrcButton" class="secondary-button">Importer un fichier .LRC</button><input id="lyricsLrcInput" type="file" accept=".lrc,text/plain" hidden><span>Les temps du fichier seront conservés.</span></div>
+      <div class="lyrics-offset"><span>Décaler toutes les lignes</span><button type="button" id="lyricsEarlierButton" class="secondary-button">− 0,5 s</button><button type="button" id="lyricsLaterButton" class="secondary-button">+ 0,5 s</button></div>
+      <p class="lyrics-help">Pour recaler les lignes, lance le morceau puis marque chaque phrase à son début. Tu peux aussi importer un fichier .LRC déjà minuté.</p>
+      <div id="syncPanel" class="sync-panel" hidden><p id="syncProgress" class="sync-progress"></p><p id="syncCurrentLine" class="sync-current-line"></p><div class="sync-actions"><button type="button" id="undoLyricLine" class="secondary-button">Annuler la dernière</button><button type="button" id="markLyricLine" class="primary-button">Marquer cette ligne</button></div></div>
+      <div class="dialog-actions"><button type="button" id="syncLyricsButton" class="secondary-button">Synchroniser en écoutant</button><button type="button" id="saveLyricsButton" class="primary-button">Enregistrer</button></div>
+    </div>
+  </section>
+</dialog>
+<dialog id="trackDetailsDialog" class="track-dialog track-details-dialog">
+  <section class="track-details">
+    <header class="track-details-header"><span class="eyebrow">FICHE DU MORCEAU</span><button type="button" id="closeTrackDetails" class="reader-icon" aria-label="Fermer la fiche">×</button></header>
+    <div id="detailsCover" class="details-cover">♫</div>
+    <div class="details-heading"><h2 id="detailsTitle">Titre</h2><p id="detailsArtist">Artiste</p></div>
+    <div class="details-actions"><button type="button" id="detailsPlayButton" class="primary-button">▶ Écouter</button><button type="button" id="detailsLyricsButton" class="secondary-button">♫ Paroles</button></div>
+    <dl class="details-metadata"><div><dt>Album</dt><dd id="detailsAlbum">—</dd></div><div><dt>Année</dt><dd id="detailsYear">—</dd></div><div><dt>Genre</dt><dd id="detailsGenre">—</dd></div><div><dt>Fichier</dt><dd id="detailsFile">—</dd></div></dl>
+    <section class="details-lyrics"><h3>Paroles</h3><p id="detailsLyrics">Aucune parole enregistrée.</p></section>
+  </section>
+</dialog>
+<dialog id="accountDialog" class="track-dialog account-dialog">
+  <div class="track-form">
+    <div class="dialog-heading"><div><p class="eyebrow">TON ESPACE PERSONNEL</p><h2 id="accountTitle">Connexion à SPOTIMAE</h2></div><button type="button" id="closeAccount" class="dialog-close" aria-label="Fermer">×</button></div>
+    <div id="accountSignedOut">
+      <p class="account-intro">Crée un compte ou connecte-toi pour retrouver ta bibliothèque sur tes appareils.</p>
+      <form id="authForm" class="form-grid"><label>E-mail<input id="authEmail" type="email" required autocomplete="email" placeholder="toi@exemple.com"></label><label>Mot de passe<input id="authPassword" type="password" required minlength="8" autocomplete="current-password" placeholder="8 caractères minimum"></label><button id="emailAuthButton" class="primary-button auth-submit" type="submit">Se connecter</button></form>
+      <button id="toggleAuthMode" class="text-button auth-toggle">Créer un compte</button><div class="auth-divider"><span>OU</span></div><button id="googleAuthButton" class="google-button"><span class="google-g">G</span> Continuer avec Google</button>
+      <p class="auth-footnote">La bibliothèque synchronisée est stockée dans ton projet Supabase privé.</p>
+    </div>
+    <div id="accountSignedIn" hidden><p id="signedInAs" class="signed-in-as"></p><p class="account-intro">Ta bibliothèque est liée à ce compte. L’envoi des morceaux locaux vers le cloud ne démarre qu’après ton action.</p><button id="syncLibraryButton" class="primary-button auth-submit">Synchroniser mes morceaux locaux</button><button id="signOutButton" class="secondary-button signout-button">Se déconnecter</button></div>
+    <p id="authMessage" class="auth-message" role="status"></p>
+  </div>
+</dialog>
+<div id="toast" class="toast" role="status"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js?v=cloud1"></script><script src="app.js?v=lyrics12"></script>
+</body>
+</html>
