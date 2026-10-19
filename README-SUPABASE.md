@@ -24,6 +24,15 @@ Dans **Authentication → URL Configuration**, ajoute l’URL du site aux **Redi
 
 Dans **Authentication → Sign In / Providers → Google**, active le fournisseur et renseigne le **Client ID** et le **Client Secret** créés dans Google Cloud Console. Dans Google, ajoute l’URL de callback affichée par Supabase (`https://<project-ref>.supabase.co/auth/v1/callback`) comme URI de redirection autorisée. Ajoute également l’URL HTTPS du site SPOTIMAE dans les Redirect URLs de Supabase.
 
+## 3 bis. Connexion Discord
+
+1. Dans le [Discord Developer Portal](https://discord.com/developers/applications), crée une application SPOTIMAE, ouvre **OAuth2** et ajoute l’URL de callback affichée par Supabase dans **Redirects**. Elle a la forme `https://<project-ref>.supabase.co/auth/v1/callback` ; pour ce projet, copie la valeur exacte affichée dans Supabase.
+2. Dans Supabase → **Authentication → Sign In / Providers → Discord**, active Discord. Copie le **Client ID** et le **Client Secret** de Discord dans les champs correspondants de Supabase, puis enregistre.
+3. Dans Supabase → **Authentication → URL Configuration**, garde `https://spotimae.vercel.app/` dans **Redirect URLs** et cette adresse comme **Site URL**. Le retour de connexion utilise l’adresse de l’application.
+4. Publie les changements du site sur GitHub/Vercel. Dans **Mon compte**, le bouton **Continuer avec Discord** sera alors visible.
+
+Le Client Secret Discord doit rester dans Supabase. Ne le colle pas dans `supabase-config.js`, dans un autre fichier du site ou dans GitHub. Le code appelle Supabase Auth avec le fournisseur `discord` ; aucune modification SQL n’est nécessaire.
+
 ## 4. Publier le site sur Vercel
 
 SPOTIMAE est un site statique : il n’a pas de compilation, de commande d’installation ou de serveur Node à lancer sur Vercel.
@@ -57,6 +66,7 @@ La bibliothèque locale IndexedDB reste liée au navigateur/appareil où les mor
 
 - Création de compte et connexion par e-mail/mot de passe.
 - Connexion Google via Supabase OAuth.
+- Connexion Discord via Supabase OAuth (à activer avec les identifiants du Discord Developer Portal).
 - Bibliothèque cloud et fichiers audio/pochettes dans un bucket privé.
 - Les policies limitent chaque ligne et chaque fichier au propriétaire du compte.
 - Les morceaux préexistants restent locaux tant que l’utilisateur ne lance pas la synchronisation manuelle.
