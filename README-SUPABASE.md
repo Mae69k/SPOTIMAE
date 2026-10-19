@@ -1,6 +1,6 @@
 # SPOTIMAE — configuration Supabase
 
-Le site fonctionne encore hors compte avec une bibliothèque locale. Le compte Supabase ajoute une bibliothèque cloud privée, synchronisée entre appareils. Après connexion, les nouveaux morceaux sont téléversés dans le bucket privé. Les morceaux locaux déjà présents ne sont envoyés que si l’utilisateur appuie sur « Synchroniser mes morceaux locaux » et confirme.
+Le site fonctionne encore hors compte avec une bibliothèque locale. Le compte Supabase ajoute une bibliothèque cloud privée, synchronisée entre appareils. Après connexion, les nouveaux morceaux sont téléversés dans le bucket privé. Les morceaux locaux déjà présents sont envoyés quand l’utilisateur appuie sur « Synchroniser ma bibliothèque ». Ce bouton envoie les morceaux locaux puis recharge également la bibliothèque cloud.
 
 ## 1. Créer le projet Supabase
 
@@ -39,7 +39,7 @@ SPOTIMAE est un site statique : il n’a pas de compilation, de commande d’ins
 1. Dans Supabase → **Authentication → URL Configuration**, mets l’adresse publique choisie comme **Site URL**, par exemple `https://spotimae.vercel.app`.
 2. Dans **Redirect URLs**, ajoute exactement `https://spotimae.vercel.app/` (et l’adresse de ton domaine personnalisé si tu en ajoutes un). Pour les aperçus Vercel facultatifs, ajoute `https://*-<identifiant-equipe>.vercel.app/**`. Garde `http://localhost:3000/**` seulement si tu l’utilises en développement ; le serveur local de ce projet utilise actuellement le port 8080, donc ajoute aussi `http://localhost:8080/**` si tu testes les confirmations e-mail ou Google OAuth en local.
 3. Dans Google Cloud Console, garde comme **Authorized redirect URI** l’URL de callback donnée par Supabase, sous la forme `https://<project-ref>.supabase.co/auth/v1/callback`. Cette adresse reste celle de Supabase ; ce n’est pas l’URL Vercel. L’adresse du site, elle, est autorisée dans les Redirect URLs de Supabase.
-4. Recharge le site déployé, crée/connecte un compte, puis importe un morceau. L’application téléverse les nouveaux morceaux dans le bucket privé. Les morceaux déjà enregistrés dans le navigateur doivent être envoyés explicitement avec **Mon compte → Synchroniser mes morceaux locaux**.
+4. Recharge le site déployé, crée/connecte un compte, puis importe un morceau. L’application téléverse les nouveaux morceaux dans le bucket privé. Les morceaux déjà enregistrés dans le navigateur doivent être envoyés explicitement avec **Mon compte → Synchroniser ma bibliothèque**. Sur un nouvel appareil, connecte-toi au même compte puis utilise ce bouton pour forcer le téléchargement de la bibliothèque cloud.
 
 Le code contient déjà l’URL Supabase et la clé **publishable** du navigateur dans `supabase-config.js`. Cette clé est conçue pour être publique ; les policies RLS du SQL et le bucket privé contrôlent l’accès aux données. N’ajoute jamais une clé `service_role` ou le secret OAuth Google aux fichiers du site ou au dépôt. N’efface pas `supabase-config.js` pendant le déploiement.
 
