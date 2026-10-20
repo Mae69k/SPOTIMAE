@@ -1,11 +1,11 @@
 # SPOTIMAE — configuration Supabase
 
-Le site fonctionne encore hors compte avec une bibliothèque locale. Le compte Supabase ajoute une bibliothèque cloud privée, synchronisée entre appareils. Après connexion, les nouveaux morceaux sont téléversés dans le bucket privé. Les morceaux locaux déjà présents sont envoyés quand l’utilisateur appuie sur « Synchroniser ma bibliothèque ». Ce bouton envoie les morceaux locaux puis recharge également la bibliothèque cloud.
+Le site fonctionne hors compte avec une bibliothèque locale. Les utilisateurs connectés partagent un catalogue cloud : lorsqu’un compte ajoute un morceau, son fichier et ses métadonnées sont téléversés dans Supabase puis les autres appareils connectés au catalogue le récupèrent automatiquement. Les morceaux importés avant cette fonction restent locaux et ne sont pas envoyés rétroactivement.
 
 ## 1. Créer le projet Supabase
 
 1. Crée un projet dans le tableau de bord Supabase.
-2. Dans **SQL Editor**, exécute le contenu de `supabase-schema.sql`. Cela crée `public.tracks` et `public.profiles`, ajoute le nom d’utilisateur unique, active les politiques RLS, ajoute ces tables à Supabase Realtime et crée le bucket privé `spotimae-media`.
+2. Dans **SQL Editor**, exécute le contenu actualisé de `supabase-schema.sql`. Cela crée `public.tracks` et `public.profiles`, ajoute le nom d’utilisateur unique, configure les permissions du catalogue partagé, ajoute ces tables à Supabase Realtime et crée le bucket `spotimae-media`.
 3. Dans **Project Settings → API**, copie l’URL du projet et la clé publique **publishable** (ou legacy `anon`). Ne prends jamais `service_role`.
 4. Colle ces deux valeurs dans `supabase-config.js` :
 
@@ -48,13 +48,13 @@ SPOTIMAE est un site statique : il n’a pas de compilation, de commande d’ins
 1. Dans Supabase → **Authentication → URL Configuration**, mets l’adresse publique choisie comme **Site URL**, par exemple `https://spotimae.vercel.app`.
 2. Dans **Redirect URLs**, ajoute exactement `https://spotimae.vercel.app/` (et l’adresse de ton domaine personnalisé si tu en ajoutes un). Pour les aperçus Vercel facultatifs, ajoute `https://*-<identifiant-equipe>.vercel.app/**`. Garde `http://localhost:3000/**` seulement si tu l’utilises en développement ; le serveur local de ce projet utilise actuellement le port 8080, donc ajoute aussi `http://localhost:8080/**` si tu testes les confirmations e-mail ou Google OAuth en local.
 3. Dans Google Cloud Console, garde comme **Authorized redirect URI** l’URL de callback donnée par Supabase, sous la forme `https://<project-ref>.supabase.co/auth/v1/callback`. Cette adresse reste celle de Supabase ; ce n’est pas l’URL Vercel. L’adresse du site, elle, est autorisée dans les Redirect URLs de Supabase.
-4. Recharge le site déployé, crée/connecte un compte, puis importe un morceau. L’application téléverse les nouveaux morceaux dans le bucket privé. Les morceaux déjà enregistrés dans le navigateur doivent être envoyés explicitement avec **Mon compte → Synchroniser ma bibliothèque**. Sur un nouvel appareil, connecte-toi au même compte puis utilise ce bouton pour forcer le téléchargement de la bibliothèque cloud.
+4. Recharge le site déployé, connecte-toi à un compte puis importe un morceau. Il est ajouté automatiquement au catalogue partagé. Sur un autre appareil, connecte-toi à SPOTIMAE et le catalogue se charge automatiquement.
 
 ### Synchronisation et profil
 
-Si tu as déjà exécuté une ancienne version de `supabase-schema.sql`, réexécute maintenant le fichier complet depuis le **SQL Editor** pour ajouter `profiles.username`, rendre le nom d’utilisateur unique, et activer les publications Realtime sur `tracks` et `profiles`. Le script utilise `if not exists` et recrée les policies avec leurs noms connus.
+Si tu as déjà exécuté une ancienne version de `supabase-schema.sql`, réexécute le fichier complet depuis le **SQL Editor** pour configurer le catalogue accessible aux comptes connectés, l’accès aux fichiers audio partagés, ajouter `profiles.username` et son index unique, et activer Realtime. Les morceaux locaux préexistants ne sont pas envoyés automatiquement.
 
-Une fois connecté, l’ajout d’un morceau téléverse son audio et ses métadonnées sur Supabase. Les autres appareils connectés au même compte reçoivent les changements Realtime et téléchargent le fichier audio dans leur bibliothèque locale. Le bouton **Synchroniser ma bibliothèque** reste disponible pour forcer un envoi/récupération, notamment après une période hors ligne. Les appareils doivent utiliser le même compte Supabase.
+Une fois connecté, l’ajout d’un morceau téléverse son audio et ses métadonnées sur Supabase. Tous les comptes connectés peuvent consulter et écouter les morceaux du catalogue partagé ; Realtime les avertit des ajouts et suppressions et chaque appareil télécharge les fichiers automatiquement. Les suppressions restent réservées au compte qui a ajouté le morceau.
 
 La session Supabase est conservée dans le stockage local du navigateur. Sur un autre navigateur ou appareil, reconnecte-toi avec le même compte Google (même adresse Google) pour accéder à ce compte ; les sessions ne sont pas partagées entre navigateurs.
 
@@ -69,9 +69,9 @@ La bibliothèque locale IndexedDB reste liée au navigateur/appareil où les mor
 - Création de compte et connexion par e-mail/mot de passe.
 - Connexion Google via Supabase OAuth.
 - Connexion Discord via Supabase OAuth (à activer avec les identifiants du Discord Developer Portal).
-- Bibliothèque cloud et fichiers audio/pochettes dans un bucket privé.
-- Les policies limitent chaque ligne et chaque fichier au propriétaire du compte.
-- Les morceaux préexistants restent locaux tant que l’utilisateur ne lance pas la synchronisation manuelle.
+- Bibliothèque partagée entre les comptes connectés, fichiers servis par un bucket privé réservé aux utilisateurs authentifiés.
+- Les comptes connectés peuvent lire les morceaux et les fichiers du catalogue partagé ; seul le compte qui a ajouté un morceau peut le modifier ou le supprimer.
+- Les morceaux préexistants restent locaux sur leur appareil et ne sont pas transférés rétroactivement.
 - La clé secrète `service_role` n’est jamais utilisée côté navigateur.
 
 

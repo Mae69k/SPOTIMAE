@@ -1,4 +1,4 @@
--- SPOTIMAE : bibliothèque cloud privée par utilisateur.
+-- SPOTIMAE : catalogue partagé réservé aux comptes authentifiés.
 -- Exécuter dans Supabase Dashboard > SQL Editor.
 
 create table if not exists public.tracks (
@@ -29,7 +29,8 @@ revoke all on public.tracks from anon;
 grant select, insert, update, delete on public.tracks to authenticated;
 
 drop policy if exists "Users can read their own tracks" on public.tracks;
-create policy "Users can read their own tracks" on public.tracks for select to authenticated using ((select auth.uid()) = user_id);
+drop policy if exists "Authenticated users can read shared tracks" on public.tracks;
+create policy "Authenticated users can read shared tracks" on public.tracks for select to authenticated using (true);
 drop policy if exists "Users can insert their own tracks" on public.tracks;
 create policy "Users can insert their own tracks" on public.tracks for insert to authenticated with check ((select auth.uid()) = user_id);
 drop policy if exists "Users can update their own tracks" on public.tracks;
@@ -40,11 +41,14 @@ create policy "Users can delete their own tracks" on public.tracks for delete to
 -- Profil utilisateur : nom, prénom et chemin de la photo dans Storage.
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
+  username text,
   first_name text not null default '',
   last_name text not null default '',
   avatar_path text,
   updated_at timestamptz not null default now()
 );
+alter table public.profiles add column if not exists username text;
+create unique index if not exists profiles_username_unique_idx on public.profiles (lower(username)) where username is not null and username <> '';
 alter table public.profiles enable row level security;
 revoke all on public.profiles from anon;
 grant select, insert, update on public.profiles to authenticated;
@@ -74,8 +78,9 @@ on conflict (id) do update set public=false, file_size_limit=52428800,
   allowed_mime_types=excluded.allowed_mime_types;
 
 drop policy if exists "Users can read their own Spotimae files" on storage.objects;
-create policy "Users can read their own Spotimae files" on storage.objects for select to authenticated
-  using (bucket_id='spotimae-media' and (storage.foldername(name))[1]=(select auth.uid()::text));
+drop policy if exists "Authenticated users can read shared Spotimae files" on storage.objects;
+create policy "Authenticated users can read shared Spotimae files" on storage.objects for select to authenticated
+  using (bucket_id='spotimae-media');
 drop policy if exists "Users can upload their own Spotimae files" on storage.objects;
 create policy "Users can upload their own Spotimae files" on storage.objects for insert to authenticated
   with check (bucket_id='spotimae-media' and (storage.foldername(name))[1]=(select auth.uid()::text));
