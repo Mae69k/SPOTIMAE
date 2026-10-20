@@ -5,7 +5,7 @@ Le site fonctionne encore hors compte avec une bibliothèque locale. Le compte S
 ## 1. Créer le projet Supabase
 
 1. Crée un projet dans le tableau de bord Supabase.
-2. Dans **SQL Editor**, exécute le contenu de `supabase-schema.sql`. Cela crée `public.tracks` et `public.profiles`, active les politiques RLS, ajoute ces tables à Supabase Realtime et crée le bucket privé `spotimae-media`.
+2. Dans **SQL Editor**, exécute le contenu de `supabase-schema.sql`. Cela crée `public.tracks` et `public.profiles`, ajoute le nom d’utilisateur unique, active les politiques RLS, ajoute ces tables à Supabase Realtime et crée le bucket privé `spotimae-media`.
 3. Dans **Project Settings → API**, copie l’URL du projet et la clé publique **publishable** (ou legacy `anon`). Ne prends jamais `service_role`.
 4. Colle ces deux valeurs dans `supabase-config.js` :
 
@@ -52,11 +52,13 @@ SPOTIMAE est un site statique : il n’a pas de compilation, de commande d’ins
 
 ### Synchronisation et profil
 
-Si tu as déjà exécuté l’ancien `supabase-schema.sql`, réexécute maintenant le fichier complet depuis le **SQL Editor** pour créer `public.profiles` et activer les publications Realtime sur `tracks` et `profiles`. Le script utilise `if not exists` et recrée les policies avec leurs noms connus.
+Si tu as déjà exécuté une ancienne version de `supabase-schema.sql`, réexécute maintenant le fichier complet depuis le **SQL Editor** pour ajouter `profiles.username`, rendre le nom d’utilisateur unique, et activer les publications Realtime sur `tracks` et `profiles`. Le script utilise `if not exists` et recrée les policies avec leurs noms connus.
 
 Une fois connecté, l’ajout d’un morceau téléverse son audio et ses métadonnées sur Supabase. Les autres appareils connectés au même compte reçoivent les changements Realtime et téléchargent le fichier audio dans leur bibliothèque locale. Le bouton **Synchroniser ma bibliothèque** reste disponible pour forcer un envoi/récupération, notamment après une période hors ligne. Les appareils doivent utiliser le même compte Supabase.
 
-Dans **Mon compte → Mon profil**, le prénom et le nom sont conservés dans `public.profiles`; la photo est enregistrée dans le bucket privé. Le mot de passe n’est jamais placé dans cette table ni dans le profil : Supabase Auth le met à jour de manière sécurisée. Un compte créé avec Google peut ajouter un mot de passe depuis son profil, puis utiliser l’e-mail et ce mot de passe pour se connecter.
+La session Supabase est conservée dans le stockage local du navigateur. Sur un autre navigateur ou appareil, reconnecte-toi avec le même compte Google (même adresse Google) pour accéder à ce compte ; les sessions ne sont pas partagées entre navigateurs.
+
+Dans **Mon compte → Mon profil**, le nom d’utilisateur SPOTIMAE, le prénom et le nom sont conservés dans `public.profiles`; le nom d’utilisateur apparaît dans l’application à la place du nom du fournisseur OAuth. La photo est enregistrée dans le bucket privé. Le mot de passe n’est jamais placé dans cette table ni dans le profil : Supabase Auth le met à jour de manière sécurisée. Un compte créé avec Google peut ajouter un mot de passe depuis son profil, puis utiliser l’e-mail et ce mot de passe pour se connecter.
 
 Le code contient déjà l’URL Supabase et la clé **publishable** du navigateur dans `supabase-config.js`. Cette clé est conçue pour être publique ; les policies RLS du SQL et le bucket privé contrôlent l’accès aux données. N’ajoute jamais une clé `service_role` ou le secret OAuth Google aux fichiers du site ou au dépôt. N’efface pas `supabase-config.js` pendant le déploiement.
 
